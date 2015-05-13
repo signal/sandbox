@@ -94,9 +94,10 @@ function getQueryParams(search) {
 }
 
 var $dateInput = $('[name="date"]'),
+  $timeInput = $('[name="time"]'),
   $datePicker = $('.datepicker'),
   queryParams = getQueryParams(),
-  selectedTimeString = queryParams.time || (new Date).toTimeString().substr(0, 5);
+  defaultDate = queryParams.ticks ? new Date(+queryParams.ticks) : new Date();
 
 $(document).foundation({
   abide: {
@@ -116,13 +117,25 @@ $.datepicker.setDefaults({
 
 $datePicker.datepicker({
   altField: $dateInput,
-  defaultDate: queryParams.date
+  defaultDate: defaultDate
 });
 
-$('[name="time"]').val(selectedTimeString);
+$timeInput.val(defaultDate.toString().substr(16, 5));
 
 $dateInput.on('valid.fndtn.abide', function () {
   $datePicker.datepicker('setDate', $(this).val());
+});
+
+$('form').on('submit', function () {
+  var date = $datePicker.datepicker('getDate'),
+    timeChunks = $timeInput.val().split(':');
+
+  date.setHours(timeChunks[0]);
+  date.setMinutes(timeChunks[1]);
+
+  window.location.search = '?ticks=' + date.valueOf();
+
+  return false;
 });
 
 </script>
