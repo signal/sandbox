@@ -24,11 +24,17 @@ input[data-invalid]:focus {
 }
 
 .ui-datepicker-calendar {
+  margin-top: 1rem;
   width: 100%;
 }
 
-.ui-datepicker-current-day {
-  color: black;
+.ui-datepicker-calendar th,
+.ui-datepicker-calendar td {
+  text-align: center;
+}
+
+.ui-state-active {
+  color: #222;
   font-weight: bold;
 }
 
@@ -38,19 +44,23 @@ input[data-invalid]:focus {
 <body>
 
 <form data-abide data-options="live_validate:true">
-  <div class="row collapse">
-    <div class="columns small-4 large-2">
-      <input type="text" name="date" pattern="mydate" placeholder="YYYY-MM-DD" required />
-    </div>
-    <div class="columns small-4 large-2">
-      <input type="text" name="time" pattern="mytime" placeholder="HH:MM" required />
-    </div>
-    <div class="columns small-4 large-2 end">
-      <span class="postfix">Local time (GMT -5)</span>
+  <div class="row">
+    <div class="columns small-6 end">
+      <div class="row collapse">
+        <div class="columns small-4">
+          <input type="text" name="date" pattern="mydate" placeholder="YYYY-MM-DD" required />
+        </div>
+        <div class="columns small-3">
+          <input type="text" name="time" pattern="mytime" placeholder="HH:MM" required />
+        </div>
+        <div class="columns small-5">
+          <span class="postfix">Local time (GMT -5)</span>
+        </div>
+      </div>
     </div>
   </div>
   <div class="row">
-    <div class="columns small-4 end">
+    <div class="columns small-6 end">
       <div class="datepicker"></div>
     </div>
   </div>
@@ -66,8 +76,27 @@ input[data-invalid]:focus {
 <script src="lib/foundation.min.js"></script>
 <script>
 
+function getQueryParams(search) {
+  search = search || window.location.search;
+
+  var ret = {};
+
+  search
+    .substr(1) // Remove leading '?'
+    .split('&')
+    .forEach(function (chunk) {
+      var pieces = chunk.split('=').map(decodeURIComponent);
+
+      ret[pieces[0]] = pieces[1];
+    });
+
+  return ret;
+}
+
 var $dateInput = $('[name="date"]'),
-  $datePicker = $('.datepicker');
+  $datePicker = $('.datepicker'),
+  queryParams = getQueryParams(),
+  selectedTimeString = queryParams.time || (new Date).toTimeString().substr(0, 5);
 
 $(document).foundation({
   abide: {
@@ -86,10 +115,11 @@ $.datepicker.setDefaults({
 });
 
 $datePicker.datepicker({
-  altField: $dateInput
+  altField: $dateInput,
+  defaultDate: queryParams.date
 });
 
-$('[name="time"]').val((new Date).toISOString().substr(11, 5));
+$('[name="time"]').val(selectedTimeString);
 
 $dateInput.on('valid.fndtn.abide', function () {
   $datePicker.datepicker('setDate', $(this).val());
