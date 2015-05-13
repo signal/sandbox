@@ -43,7 +43,7 @@ input[data-invalid]:focus {
 
 <body>
 
-<form data-abide data-options="live_validate:true">
+<form data-abide="ajax" data-options="live_validate:true">
   <div class="row">
     <div class="columns small-6 end">
       <div class="row collapse">
@@ -126,7 +126,7 @@ $dateInput.on('valid.fndtn.abide', function () {
   $datePicker.datepicker('setDate', $(this).val());
 });
 
-$('form').on('submit', function () {
+$('form').on('valid.fndtn.abide', function () {
   var date = $datePicker.datepicker('getDate'),
     timeChunks = $timeInput.val().split(':');
 
@@ -134,8 +134,6 @@ $('form').on('submit', function () {
   date.setMinutes(timeChunks[1]);
 
   window.location.search = '?ticks=' + date.valueOf();
-
-  return false;
 });
 
 </script>
