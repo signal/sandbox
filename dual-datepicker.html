@@ -1,0 +1,215 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Date Inputs</title>
+<link rel="stylesheet" href="lib/foundation.min.css" />
+<script src="lib/modernizr.js"></script>
+<style type="text/css">
+
+input[data-invalid],
+input[data-invalid]:focus {
+  border-color: red;
+}
+
+.ui-datepicker-prev {
+  float: left;
+}
+.ui-datepicker-title {
+  text-align: center;
+}
+.ui-datepicker-next {
+  float: right;
+}
+
+.ui-datepicker-calendar {
+  margin-top: 1rem;
+  width: 100%;
+}
+
+.ui-datepicker-calendar th,
+.ui-datepicker-calendar td {
+  text-align: center;
+}
+
+.ui-state-active {
+  color: #222;
+  font-weight: bold;
+}
+
+</style>
+</head>
+
+<body>
+
+<form data-abide="ajax" data-options="live_validate:true">
+  <div class="row">
+    <div class="columns small-6">
+      <div class="row">
+        <div class="columns small-6">
+          <input type="text" name="start-date" pattern="mydate" placeholder="YYYY-MM-DD" required />
+        </div>
+        <div class="columns small-6">
+          <input type="text" name="start-time" pattern="mytime" placeholder="HH:MM" required />
+        </div>
+      </div>
+      <div class="row">
+        <div class="columns">
+          <div class="start-datepicker"></div>
+        </div>
+      </div>
+    </div>
+    <div class="columns small-6">
+      <div class="row">
+        <div class="columns small-6">
+          <input type="text" name="end-date" pattern="mydate" placeholder="YYYY-MM-DD" required />
+        </div>
+        <div class="columns small-6">
+          <input type="text" name="end-time" pattern="mytime" placeholder="HH:MM" required />
+        </div>
+      </div>
+      <div class="row">
+        <div class="columns">
+          <div class="end-datepicker"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="columns">
+      <button type="submit">Submit</button>
+    </div>
+  </div>
+</form>
+
+<script src="lib/jquery.js"></script>
+<script src="lib/jquery-ui.min.js"></script>
+<script src="lib/foundation.min.js"></script>
+<script>
+
+function getQueryParams(search) {
+  search = search || window.location.search;
+
+  var ret = {};
+
+  search
+    .substr(1) // Remove leading '?'
+    .split('&')
+    .forEach(function (chunk) {
+      var pieces = chunk.split('=').map(decodeURIComponent);
+
+      ret[pieces[0]] = pieces[1];
+    });
+
+  return ret;
+}
+
+function toTicks($datePicker, $timeInput) {
+  var date = $datePicker.datepicker('getDate'),
+    timeChunks = $timeInput.val().split(':');
+
+  date.setHours(timeChunks[0]);
+  date.setMinutes(timeChunks[1]);
+
+  return +date;
+}
+
+function setDateAndTime($datepicker, $timeInput, date) {
+  var timeString = date.toString().substr(16, 5);
+
+  $datepicker.datepicker('setDate', date);
+  $timeInput.val(timeString);
+}
+
+var HALF_HOUR = 1000 * 60 * 30,
+  queryParams = getQueryParams(),
+  defaultStartDate = queryParams.start ? new Date(+queryParams.start) : new Date(),
+  defaultEndDate = queryParams.end ? new Date(+queryParams.end) : new Date(+defaultStartDate + HALF_HOUR),
+  $startDateInput = $('[name="start-date"]'),
+  $startTimeInput = $('[name="start-time"]'),
+  $startDatepicker = $('.start-datepicker'),
+  $endTimeInput = $('[name="end-time"]'),
+  $endDateInput = $('[name="end-date"]'),
+  $endDatepicker = $('.end-datepicker');
+
+function resolveEndTime() {
+  var startTicks = toTicks($startDatepicker, $startTimeInput),
+    endTicks = toTicks($endDatepicker, $endTimeInput);
+
+  if (endTicks <= startTicks) {
+    setDateAndTime($endDatepicker, $endTimeInput, new Date(startTicks + HALF_HOUR));
+  }
+}
+
+function resolveStartTime() {
+  var startTicks = toTicks($startDatepicker, $startTimeInput),
+    endTicks = toTicks($endDatepicker, $endTimeInput);
+
+  if (startTicks >= endTicks) {
+    setDateAndTime($startDatepicker, $startTimeInput, new Date(endTicks - HALF_HOUR));
+  }
+}
+
+// Defaults
+
+$(document).foundation({
+  abide: {
+    live_validate: false,
+    patterns: { // Lifted from http://foundation.zurb.com/docs/components/abide.html, but needs ^$ terminators
+      mydate: /^(?:19|20)[0-9]{2}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1[0-9]|2[0-9])|(?:(?!02)(?:0[1-9]|1[0-2])-(?:30))|(?:(?:0[13578]|1[02])-31))$/,
+      mytime: /^(0[0-9]|1[0-9]|2[0-3])(:[0-5][0-9])$/
+    }
+  }
+});
+
+$.datepicker.setDefaults({
+  dateFormat: 'yy-mm-dd',
+  nextText: '▶',
+  prevText: '◀'
+});
+
+// Start datepicker
+
+$startDatepicker.datepicker({
+  altField: $startDateInput,
+  onSelect: resolveEndTime
+});
+
+setDateAndTime($startDatepicker, $startTimeInput, defaultStartDate);
+
+$startDateInput.on('valid.fndtn.abide', function () {
+  $startDatepicker.datepicker('setDate', $(this).val());
+  resolveEndTime();
+});
+
+$startTimeInput.on('valid.fndtn.abide', resolveEndTime);
+
+// End datepicker
+
+$endDatepicker.datepicker({
+  altField: $endDateInput,
+  onSelect: resolveStartTime
+});
+
+setDateAndTime($endDatepicker, $endTimeInput, defaultEndDate);
+
+$endDateInput.on('valid.fndtn.abide', function () {
+  $endDatepicker.datepicker('setDate', $(this).val());
+  resolveStartTime();
+});
+
+$endTimeInput.on('valid.fndtn.abide', resolveStartTime);
+
+// Save
+
+$('form').on('valid.fndtn.abide', function () {
+  var startTicks = toTicks($startDatepicker, $startTimeInput),
+    endTicks = toTicks($endDatepicker, $endTimeInput);
+
+  window.location.search = '?start=' + startTicks + '&end=' + endTicks;
+});
+
+</script>
+</body>
+</html>
