@@ -1,0 +1,51 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Instamodal</title>
+<link rel="stylesheet" href="lib/normalize.css" />
+<link rel="stylesheet" href="lib/foundation.min.css" />
+<script src="lib/modernizr.js"></script>
+<style type="text/css">
+
+.instamodal.reveal-modal {
+  display: block;
+  opacity: 1;
+  visibility: visible;
+  top: 100px;
+}
+
+.instamodal.reveal-modal-bg {
+  display: block;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="row">
+  <div class="columns">
+    <a class="button" href="#" data-reveal-id="myModal">Click Me For A Modal</a>
+  </div>
+</div>
+
+<div id="myModal" class="instamodal reveal-modal open" data-reveal aria-labelledby="modalTitle" aria-hidden="false" role="dialog">
+  <h2 id="modalTitle">Awesome. I have it.</h2>
+  <p class="lead">Your couch.  It is mine.</p>
+  <p>I'm a cool paragraph that lives inside of an even cooler modal. Wins!</p>
+  <a class="close-reveal-modal" aria-label="Close">&#215;</a>
+</div>
+
+<div class="instamodal reveal-modal-bg"></div>
+
+<script src="lib/jquery.js"></script>
+<script src="lib/foundation.min.js"></script>
+<script type="text/javascript">
+
+$(document).foundation();
+
+</script>
+</body>
+</html>
