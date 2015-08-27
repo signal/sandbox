@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>jasmine</title>
+<link rel="stylesheet" type="text/css" href="lib/jasmine/jasmine.css">
+<script type="text/javascript" src="lib/jasmine/jasmine.js"></script>
+<script type="text/javascript" src="lib/jasmine/jasmine-html.js"></script>
+<script type="text/javascript" src="lib/jasmine/boot.js"></script>
+</head>
+
+<body>
+<script type="text/javascript">
+
+function Foo() {
+
+}
+
+describe('foo', function () {
+  it('bar', function () {
+    var foo = new Foo;
+
+    expect(1).not.toEqual(jasmine.any(Boolean));
+  });
+});
+
+</script>
+</body>
+</html>
